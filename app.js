@@ -1,6 +1,6 @@
 require("ejs");
 require('dotenv').config();
-const PORT = process.env.PORT || 3040;
+const PORT = process.env.PORT || 3000;
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
@@ -78,6 +78,19 @@ User.findOrCreate({ googleId: profile.id }, function (err, user) {
 }
 ));
 
+//# GET - /AUTH/GOOGLE
+app.get('/auth/google', //! This request triggers when user uses the sign up with google on register page.
+passport.authenticate("google", { scope: ["profile"] }));
+
+
+//# GET - /AUTH/GOOGLE/SECRETS
+app.get('/auth/google/secrets',  //! this get req is triggered by google when it completes user authentication.
+passport.authenticate("google", { failureRedirect: "/login" }),
+function(req, res) {
+  //! Successful authentication, redirect to secrets.
+  res.redirect('/secrets');
+});
+
 
 //# GET - /
 app.get("/", function (req, res) {
@@ -101,18 +114,6 @@ res.render("register");
 });
 
 
-//# GET - /AUTH/GOOGLE
-app.get('/auth/google', //! This request triggers when user uses the sign up with google on register page.
-passport.authenticate("google", { scope: ["profile"] }));
-
-
-//# GET - /AUTH/GOOGLE/SECRETS
-app.get('/auth/google/secrets',  //! this get req is triggered by google when it completes user authentication.
-passport.authenticate("google", { failureRedirect: "/login" }),
-function(req, res) {
-  //! Successful authentication, redirect to secrets.
-  res.redirect('/secrets');
-});
 
 
 //# GET - SECRETS
