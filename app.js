@@ -72,7 +72,7 @@ userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo" //! From GitHub 
 },
 function(accessToken, refreshToken, profile, cb) {
 console.log(profile.id, profile.name);
-User.findOrCreate({ googleId: profile.id }, function (err, user) {
+User.findOrCreate({ username: profile.displayName, googleId: profile.id }, function (err, user) {
   return cb(err, user);
 });
 }
