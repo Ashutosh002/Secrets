@@ -25,9 +25,6 @@ app.use(passport.initialize());
 app.use(passport.session()); 
 
 
-//#---Local Database Connected---//
-// mongoose.connect("mongodb://127.0.0.1:27017/userDB", { useNewUrlParser: true }, mongoose.set('strictQuery', false));
-
 //#----MongoDB ATLAS Connection----//
 mongoose.connect(process.env.ATLAS_URL, { useNewUrlParser: true}, {useUnifiedTopology: true}, mongoose.set('strictQuery', false));
 
@@ -78,30 +75,18 @@ User.findOrCreate({ username: profile.displayName, googleId: profile.id }, funct
 }
 ));
 
-
+//# GET - /AUTH/GOOGLE
 app.get('/auth/google',
   passport.authenticate('google', { scope:
       ['profile'] }
 ));
 
+//# GET - /AUTH/GOOGLE/CALLBACK
 app.get( '/auth/google/callback',
     passport.authenticate( 'google', {
         successRedirect: '/secrets',
         failureRedirect: '/register'
 }));
-
-
-// //# GET - /AUTH/GOOGLE
-// app.get('/auth/google', passport.authenticate("google", { scope: ["profile"] }));
-// //! This request triggers when user uses the sign up with google on register page
-
-// //# GET - /AUTH/GOOGLE/SECRETS
-// //! this get req is triggered by google when it completes user authentication.
-// app.get('/auth/google/secrets',  passport.authenticate("google", { failureRedirect: "/login" }), function(req, res) {
-//   res.redirect('/secrets');
-//   //! Successful authentication, redirect to secrets.
-// });
-
 
 //# GET - /
 app.get("/", function (req, res) {
@@ -204,15 +189,6 @@ req.login(user, function(err){
   } 
 });
 });
-
-//*alternate method found on stackOverflow
-// app.post("/login", (req, res) => {
-//   passport.authenticate("local")(req, res, function(){
-//     res.redirect("secrets");
-//   })
-// });
-
-
 
 //# POST - SUBMIT
 app.post("/submit", function(req, res){
