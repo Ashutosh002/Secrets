@@ -67,7 +67,7 @@ process.nextTick(function() {
 passport.use(new GoogleStrategy({
 clientID: process.env.CLIENT_ID,
 clientSecret: process.env.CLIENT_SECRET,
-callbackURL: "https://secrets-mzso.onrender.com/auth/google/callback",
+callbackURL: "https://secrets-mzso.onrender.com/auth/google/secrets",
 userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo" //! From GitHub Issues because of G+ Deprecation 
 },
 function(accessToken, refreshToken, profile, cb) {
