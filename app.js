@@ -78,16 +78,29 @@ User.findOrCreate({ googleId: profile.id }, function (err, user) {
 }
 ));
 
-//# GET - /AUTH/GOOGLE
-app.get('/auth/google', passport.authenticate("google", { scope: ["profile"] }));
-//! This request triggers when user uses the sign up with google on register page
 
-//# GET - /AUTH/GOOGLE/SECRETS
-//! this get req is triggered by google when it completes user authentication.
-app.get('/auth/google/secrets',  passport.authenticate("google", { failureRedirect: "/login" }), function(req, res) {
-  res.redirect('/secrets');
-  //! Successful authentication, redirect to secrets.
-});
+app.get('/auth/google',
+  passport.authenticate('google', { scope:
+      ['profile'] }
+));
+
+app.get( '/auth/google/callback',
+    passport.authenticate( 'google', {
+        successRedirect: '/secrets',
+        failureRedirect: '/register'
+}));
+
+
+// //# GET - /AUTH/GOOGLE
+// app.get('/auth/google', passport.authenticate("google", { scope: ["profile"] }));
+// //! This request triggers when user uses the sign up with google on register page
+
+// //# GET - /AUTH/GOOGLE/SECRETS
+// //! this get req is triggered by google when it completes user authentication.
+// app.get('/auth/google/secrets',  passport.authenticate("google", { failureRedirect: "/login" }), function(req, res) {
+//   res.redirect('/secrets');
+//   //! Successful authentication, redirect to secrets.
+// });
 
 
 //# GET - /
