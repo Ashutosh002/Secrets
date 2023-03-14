@@ -31,7 +31,7 @@ app.use(passport.session());
 //#----MongoDB ATLAS Connection----//
 mongoose.connect(process.env.ATLAS_URL, { useNewUrlParser: true}, {useUnifiedTopology: true}, mongoose.set('strictQuery', false));
 
-//#---Schema---//
+//#---Schema---//ls
 const userSchema = new mongoose.Schema({
   email: String,
   password: String,
@@ -67,28 +67,26 @@ process.nextTick(function() {
 passport.use(new GoogleStrategy({
 clientID: process.env.CLIENT_ID,
 clientSecret: process.env.CLIENT_SECRET,
-callbackURL: "http://localhost:3000/auth/google/secrets",
-userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
+callbackURL: "http://localhost:3000/auth/google/callback",
+userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo" //! From GitHub Issues because of G+ Deprecation 
 },
 function(accessToken, refreshToken, profile, cb) {
 console.log(profile.id, profile.name);
-User.findOrCreate({ googleId: profile.id }, function (err, user) {
+User.findOrCreate({ username: profile.displayName, googleId: profile.id }, function (err, user) {
   return cb(err, user);
 });
 }
 ));
 
 //# GET - /AUTH/GOOGLE
-app.get('/auth/google', //! This request triggers when user uses the sign up with google on register page.
-passport.authenticate("google", { scope: ["profile"] }));
-
+app.get('/auth/google', passport.authenticate("google", { scope: ["profile"] }));
+//! This request triggers when user uses the sign up with google on register page
 
 //# GET - /AUTH/GOOGLE/SECRETS
-app.get('/auth/google/secrets',  //! this get req is triggered by google when it completes user authentication.
-passport.authenticate("google", { failureRedirect: "/login" }),
-function(req, res) {
-  //! Successful authentication, redirect to secrets.
+//! this get req is triggered by google when it completes user authentication.
+app.get('/auth/google/callback',  passport.authenticate("google", { failureRedirect: "/login" }), function(req, res) {
   res.redirect('/secrets');
+  //! Successful authentication, redirect to secrets.
 });
 
 
@@ -123,7 +121,7 @@ User.find({"secret": {$ne: null}}, function(err, foundUsers){ //! {$ne: null} me
     console.log(err);
   } else {
     if(foundUsers) {
-    //  console.log("Cookie that is being sent back: " + req.headers.cookie); //! This logs the cookie that client sents to us with HTTP GET request.
+    //console.log("Cookie that is being sent back: " + req.headers.cookie); //! This logs the cookie that client sents to us with HTTP GET request.
       res.render("secrets", {SecretUsers: foundUsers});
     } else {
       console.log("No secret has been posted yet, check back later or post your secret.");
