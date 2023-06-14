@@ -1,6 +1,6 @@
 require("ejs");
 require('dotenv').config();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000; //!DO NOT CHANGE THIS PORT NUMBER!! EVER!!
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
@@ -31,9 +31,8 @@ app.use(passport.session());
 //#----MongoDB ATLAS Connection----//
 mongoose.connect(process.env.ATLAS_URL, { useNewUrlParser: true}, {useUnifiedTopology: true}, mongoose.set('strictQuery', false));
 
-//#---Schema---//ls
+//#---Schema---//
 const userSchema = new mongoose.Schema({
-  email: String,
   password: String,
   googleId: String, //! To store the ID that is receieved from Google
   secret: String //! To store the secret posted by user
@@ -52,14 +51,14 @@ passport.use(User.createStrategy());
 
 //#---USER Serialization & De-Serialization---//
 passport.serializeUser(function(user, cb) {
-process.nextTick(function() {
-  cb(null, { id: user.id, username: user.username, name: user.name });
-});
+  process.nextTick(function() {
+    cb(null, { id: user.id, username: user.username, name: user.name });
+  });
 });
 passport.deserializeUser(function(user, cb) {
-process.nextTick(function() {
-  return cb(null, user);
-});
+  process.nextTick(function() {
+    return cb(null, user);
+  });
 });
 
 
@@ -112,22 +111,25 @@ res.render("register");
 });
 
 
-
-
 //# GET - SECRETS
 app.get("/secrets", function(req, res){
-User.find({"secret": {$ne: null}}, function(err, foundUsers){ //! {$ne: null} means not null
-  if(err){
-    console.log(err);
+  if(req.isAuthenticated()){
+    User.find({"secret": {$ne: null}}, function(err, foundUsers){ //! {$ne: null} means not null
+      if(err){
+        console.log(err);
+      } else {
+        if(foundUsers) {
+        //console.log("Cookie that is being sent back: " + req.headers.cookie); //! This logs the cookie that client sents to us with HTTP GET request.
+          res.render("secrets", {SecretUsers: foundUsers});
+        } else {
+          console.log("No secret has been posted yet, check back later or post your secret.");
+        }
+      }
+    });
   } else {
-    if(foundUsers) {
-    //console.log("Cookie that is being sent back: " + req.headers.cookie); //! This logs the cookie that client sents to us with HTTP GET request.
-      res.render("secrets", {SecretUsers: foundUsers});
-    } else {
-      console.log("No secret has been posted yet, check back later or post your secret.");
-    }
+    res.render("login");
   }
-});
+
 });
 
 
@@ -157,7 +159,7 @@ app.get("/logout", function(req, res){
 //# POST - REGISTER
 app.post("/register", function(req, res){
 //! Below code is from passport-local-mongoose
-User.register({ username: req.body.username }, req.body.password, function(err, user){
+User.register({ username: req.body.username }, req.body.password , function(err, user){
   if(err){
     console.log(err);
     res.redirect("/register");
@@ -165,40 +167,18 @@ User.register({ username: req.body.username }, req.body.password, function(err, 
     passport.authenticate("local")(req, res, function(){
       console.log("New User Registered: " + req.user.username);
       res.redirect("submit");
-
     })
   }
 })
 });
 
 //# POST - LOGIN 
-//? Do research on how to give bad credential msg 
-app.post("/login", function(req, res){
-const user = new User({
-  username: req.body.username,
-  password: req.body.password
-});
-//! Below code is from passport.js > concepts > authentication > log in
-req.login(user, function(err){
-  if(err){
-    console.log(err);
-  } else {
-    passport.authenticate("local")(req, res, function(){
-      res.redirect("secrets");
-      console.log("Current logged in user: " + req.user.username); 
-      // console.log("Cookie that is being Set: " + res.get('set-cookie'));  //! This logs the cookie that is being set by server with the HTTP POST response.
-    })
-  } 
-});
-});
-
-//*alternate method found on stackOverflow
-// app.post("/login", (req, res) => {
-//   passport.authenticate("local")(req, res, function(){
-//     res.redirect("secrets");
-//   })
-// });
-
+app.post('/login', 
+  passport.authenticate('local', { failureRedirect: '/login' }),
+  function(req, res) {
+    console.log("Current logged in user: " + req.user.username); 
+    res.redirect('/secrets');
+  });
 
 
 //# POST - SUBMIT
