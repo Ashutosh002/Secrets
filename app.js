@@ -25,9 +25,6 @@ app.use(passport.initialize());
 app.use(passport.session()); 
 
 
-//#---Local Database Connected---//
-// mongoose.connect("mongodb://127.0.0.1:27017/userDB", { useNewUrlParser: true }, mongoose.set('strictQuery', false));
-
 //#----MongoDB ATLAS Connection----//
 mongoose.connect(process.env.ATLAS_URL, { useNewUrlParser: true}, {useUnifiedTopology: true}, mongoose.set('strictQuery', false));
 
@@ -88,6 +85,12 @@ app.get('/auth/google/callback',  passport.authenticate("google", { failureRedir
   //! Successful authentication, redirect to secrets.
 });
 
+//# GET - /AUTH/GOOGLE/CALLBACK
+app.get( '/auth/google/callback',
+    passport.authenticate( 'google', {
+        successRedirect: '/secrets',
+        failureRedirect: '/register'
+}));
 
 //# GET - /
 app.get("/", function (req, res) {
