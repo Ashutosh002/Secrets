@@ -49,7 +49,7 @@ passport.use(User.createStrategy());
 //#---USER Serialization & De-Serialization---//
 passport.serializeUser(function(user, cb) {
   process.nextTick(function() {
-    cb(null, { id: user.id, username: user.username, name: user.name });
+    cb(null, { id: user.id, username: user.username});
   });
 });
 passport.deserializeUser(function(user, cb) {
@@ -63,7 +63,7 @@ passport.deserializeUser(function(user, cb) {
 passport.use(new GoogleStrategy({
 clientID: process.env.CLIENT_ID,
 clientSecret: process.env.CLIENT_SECRET,
-callbackURL: "http://localhost:3000/auth/google/callback",
+callbackURL: "https://secrets-mzso.onrender.com/auth/google/callback",
 userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo" //! From GitHub Issues because of G+ Deprecation 
 },
 function(accessToken, refreshToken, profile, cb) {
@@ -188,12 +188,12 @@ app.post('/login',
 app.post("/submit", function(req, res){
 const submittedSecret = req.body.secret;
 const loggedInUserID = req.user.id;  //! Fetching the logged in user ID from the session that we receive through cookie(session)
-
 User.findById(loggedInUserID, function(err, foundUser){
   if(err){
     console.log(err);
   } else{
     if(foundUser){
+      console.log(foundUser.username);
       foundUser.secret = submittedSecret;
       foundUser.save(function(){
         res.redirect("secrets");
